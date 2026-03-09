@@ -1,8 +1,7 @@
 fn main() {
-    let mut score = 0;
-    score = 10;
+    let score: i32 = 10;
 
-    let _status = if score > 5 { "win" } else { "lose" };
+    let _status: &str = if score > 5 { "win" } else { "lose" };
 
     struct Player {
         name: String,
@@ -19,6 +18,6 @@ fn main() {
         }
     }
 
-    let p = Player::new(String::from("ali"), score);
+    let p: Player = Player::new(String::from("ali"), score);
     println!("{}", p.describe())
 }
