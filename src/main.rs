@@ -7,8 +7,8 @@ fn tree() -> Result<(), Box<dyn std::error::Error>> {
 		let path = dir?.path();
 		match fs_extra::dir::get_size(&path) {
 			Ok(size) => println!("{}: {}", path.display(), size),
-			Err(_) => println!("{}: Error(permission denied?)", path.display()),
-	}
+			Err(_) => println!("{}: Error (permission denied?)", path.display()),
+		}
 	}
 	Ok(())
 }
