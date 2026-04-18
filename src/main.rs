@@ -1,18 +1,18 @@
 use std::fs;
 use std::path::Path;
-use fs_extra;
+use std::process::Command;
 
 fn tree() -> Result<(), Box<dyn std::error::Error>> {
 	for dir in fs::read_dir(Path::new("/"))? {
 		let path = dir?.path();
-		match fs_extra::dir::get_size(&path) {
-			Ok(size) => println!("{}: {}", path.display(), size),
-			Err(_) => println!("{}: Error (permission denied?)", path.display()),
+		match fs::metadata(&path) {
+			Ok(meta) => println!("{}: {:?}", path.display(), meta),
+			Err(_) => println!("{}: Err", path.display())
 		}
 	}
 	Ok(())
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-  tree()
+	tree()
 }

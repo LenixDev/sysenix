@@ -3,5 +3,4 @@ name = "sysenix"
 edition = "2024"
 
 [dependencies]
-fs_extra = "1.3.0"
 lenix = "0.1.3"
