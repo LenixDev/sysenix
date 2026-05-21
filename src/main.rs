@@ -21,6 +21,16 @@ impl ApplicationHandler for App {
   }
 }
 
+fn load_icon(path: &str) -> tray_icon::Icon {
+  let file = std::fs::File::open(path).unwrap();
+  let decoder = png::Decoder::new(file);
+  let mut reader = decoder.read_info().unwrap();
+  let mut buf = vec![0; reader.output_buffer_size()];
+  let info = reader.next_frame(&mut buf).unwrap();
+  let bytes = &buf[..info.buffer_size()];
+  tray_icon::Icon::from_rgba(bytes.to_vec(), info.width, info.height).unwrap()
+}
+
 fn main() {
   let event_loop = EventLoop::new().unwrap();
 
@@ -28,8 +38,10 @@ fn main() {
   let quit = MenuItem::new("Quit", true, None);
   menu.append(&quit).unwrap();
 
+	let icon = load_icon("assets/gear.png");
+
   let tray = TrayIconBuilder::new()
-    .with_title("🤖")
+		.with_icon(icon)
     .with_menu(Box::new(menu))
     .build()
     .unwrap();

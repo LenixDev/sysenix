@@ -1823,6 +1823,7 @@ name = "sysenix"
 version = "0.0.0"
 dependencies = [
  "lenix",
+ "png",
  "tray-icon",
  "winit",
 ]
