@@ -38,7 +38,7 @@ fn main() {
   let quit = MenuItem::new("Quit", true, None);
   menu.append(&quit).unwrap();
 
-	let icon = load_icon("assets/gear.png");
+	let icon = load_icon("assets/favicon-light.png");
 
   let tray = TrayIconBuilder::new()
 		.with_icon(icon)
