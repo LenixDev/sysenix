@@ -8,25 +8,44 @@ use objc::declare::ClassDecl;
 use objc::runtime::{Class, Object, Sel};
 use objc::*;
 
-mod contstants;
+mod constants;
+use constants::{PADDING, WIDTH, HEIGHT};
 
 static mut POPOVER: id = nil;
 static mut STATUS_ITEM: id = nil;
 
-extern "C" fn toggle_popover(_this: &Object, _cmd: Sel, _sender: id) {
-  unsafe {
-    let is_shown: bool = msg_send![POPOVER, isShown];
-    if is_shown {
-      let _: () = msg_send![POPOVER, close];
-    } else {
-      let button = STATUS_ITEM.button();
-      let _: () = msg_send![POPOVER,
-        showRelativeToRect: NSView::frame(button)
-        ofView: button
-        preferredEdge: 1u64
-      ];
-    }
-  }
+fn objective_c_methods(decl: &mut ClassDecl) {
+	extern "C" fn toggle_popover(_this: &Object, _cmd: Sel, _sender: id) {
+		unsafe {
+			let is_shown: bool = msg_send![POPOVER, isShown];
+			if is_shown {
+				let _: () = msg_send![POPOVER, close];
+			} else {
+				let button = STATUS_ITEM.button();
+				let _: () = msg_send![POPOVER,
+					showRelativeToRect: NSView::frame(button)
+					ofView: button
+					preferredEdge: 1u64
+				];
+			}
+		}
+	}
+	unsafe {
+		decl.add_method(
+			selector("toggle:"),
+			toggle_popover as extern "C" fn(&Object, Sel, id),
+		);
+	}
+
+	extern "C" fn quit(_this: &Object, _cmd: Sel, _sender: id) {
+		std::process::exit(0);
+	}
+	unsafe {
+		decl.add_method(
+			selector("quit:"),
+			quit as extern "C" fn(&Object, Sel, id)
+		);
+	}
 }
 
 fn sbi_set_app_icon() {
@@ -38,9 +57,6 @@ fn sbi_set_app_icon() {
   }
 }
 
-extern "C" fn quit(_this: &Object, _cmd: Sel, _sender: id) {
-  std::process::exit(0);
-}
 
 fn sbi_handle_click(delegate: *mut Object) {
   unsafe {
@@ -71,15 +87,7 @@ fn main() {
     let superclass = Class::get("NSObject").unwrap();
     let mut decl = ClassDecl::new("Delegate", superclass).unwrap();
 
-		// Object-C methods
-    decl.add_method(
-      selector("toggle:"),
-      toggle_popover as extern "C" fn(&Object, Sel, id),
-    );
-		decl.add_method(
-			selector("quit:"),
-			quit as extern "C" fn(&Object, Sel, id)
-		);
+		objective_c_methods(&mut decl);
 
     let delegate_class = decl.register();
     let delegate: id = msg_send![delegate_class, new];
@@ -87,22 +95,16 @@ fn main() {
     sbi_handle_click(delegate);
 
 		// sbi_popover
-		let frame = NSRect::new(NSPoint::new(0.0, 0.0), NSSize::new(contstants::WIDTH, contstants::HEIGHT));
+		let frame = NSRect::new(NSPoint::new(0.0, 0.0), NSSize::new(WIDTH, HEIGHT));
 		let view: id = msg_send![class!(NSView), alloc];
 		let view: id = msg_send![view, initWithFrame: frame];
     let vc: id = msg_send![class!(NSViewController), new];
     let _: () = msg_send![vc, setView: view];
     let _: () = msg_send![POPOVER, setContentViewController: vc];
-    let _: () = msg_send![POPOVER, setContentSize: NSSize::new(contstants::WIDTH, contstants::HEIGHT)];
+    let _: () = msg_send![POPOVER, setContentSize: NSSize::new(WIDTH, HEIGHT)];
 
-		// popover input item
-		let input_frame = NSRect::new(NSPoint::new(contstants::PADDING, contstants::PADDING), NSSize::new(contstants::WIDTH - (contstants::PADDING * 2.0), 25.0));
-		let input: id = msg_send![class!(NSTextField), alloc];
-		let input: id = msg_send![input, initWithFrame: input_frame];
-		let _: () = msg_send![input, setPlaceholderString: NSString::alloc(nil).init_str("Ask Sysenix...")];
-		let _: () = msg_send![view, addSubview: input];
-
-		let header_frame = NSRect::new(NSPoint::new(contstants::PADDING, contstants::PADDING), NSSize::new(contstants::WIDTH * 0.8, contstants::HEIGHT - contstants::PADDING * 2.0));
+		// popover header
+		let header_frame = NSRect::new(NSPoint::new(PADDING, PADDING), NSSize::new(WIDTH * 0.8, HEIGHT - PADDING * 2.0));
 		let header: id = msg_send![class!(NSTextField), alloc];
 		let header: id = msg_send![header, initWithFrame: header_frame];
 		let _: () = msg_send![header, setStringValue: NSString::alloc(nil).init_str("Sysenix")];
@@ -111,6 +113,14 @@ fn main() {
 		let clear: id = msg_send![class!(NSColor), clearColor];
 		let _: () = msg_send![header, setBackgroundColor: clear];
 		let _: () = msg_send![view, addSubview: header];
+		
+		// popover input item
+		let input_frame = NSRect::new(NSPoint::new(PADDING, PADDING), NSSize::new(WIDTH - (PADDING * 2.0), 25.0));
+		let input: id = msg_send![class!(NSTextField), alloc];
+		let input: id = msg_send![input, initWithFrame: input_frame];
+		let _: () = msg_send![input, setPlaceholderString: NSString::alloc(nil).init_str("Ask Sysenix...")];
+		let _: () = msg_send![view, addSubview: input];
+
 		
 		// // sbi_quit_btn
 		// let btn_frame = NSRect::new(NSPoint::new(100.0, 80.0), NSSize::new(100.0, 30.0));
