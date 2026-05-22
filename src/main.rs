@@ -3,5 +3,5 @@ mod constants;
 mod locales;
 
 fn main() {
-  app::main();
+  app::start();
 }
