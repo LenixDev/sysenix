@@ -11,7 +11,8 @@ use objc::*;
 static mut POPOVER: id = nil;
 static mut STATUS_ITEM: id = nil;
 static WIDTH: f64 = 300.0;
-static HEIGHT: f64 = 200.0;
+static HEIGHT: f64 = 75.0;
+static PADDING: f64 = 10.0;
 
 extern "C" fn toggle_popover(_this: &Object, _cmd: Sel, _sender: id) {
   unsafe {
@@ -95,13 +96,22 @@ fn main() {
     let _: () = msg_send![POPOVER, setContentViewController: vc];
     let _: () = msg_send![POPOVER, setContentSize: NSSize::new(WIDTH, HEIGHT)];
 
-		let input_frame = NSRect::new(NSPoint::new(WIDTH * 0.02, HEIGHT * 0.04), NSSize::new(WIDTH * 0.96, HEIGHT *  0.12));
+		// popover input item
+		let input_frame = NSRect::new(NSPoint::new(PADDING, PADDING), NSSize::new(WIDTH - (PADDING * 2.0), 25.0));
 		let input: id = msg_send![class!(NSTextField), alloc];
 		let input: id = msg_send![input, initWithFrame: input_frame];
 		let _: () = msg_send![input, setPlaceholderString: NSString::alloc(nil).init_str("Ask Sysenix...")];
 		let _: () = msg_send![view, addSubview: input];
 
-
+		let header_frame = NSRect::new(NSPoint::new(PADDING, PADDING), NSSize::new(WIDTH * 0.8, HEIGHT - PADDING * 2.0));
+		let header: id = msg_send![class!(NSTextField), alloc];
+		let header: id = msg_send![header, initWithFrame: header_frame];
+		let _: () = msg_send![header, setStringValue: NSString::alloc(nil).init_str("Sysenix")];
+		let _: () = msg_send![header, setBordered: cocoa::base::NO];
+		let _: () = msg_send![header, setEditable: cocoa::base::NO];
+		let clear: id = msg_send![class!(NSColor), clearColor];
+		let _: () = msg_send![header, setBackgroundColor: clear];
+		let _: () = msg_send![view, addSubview: header];
 		
 		// // sbi_quit_btn
 		// let btn_frame = NSRect::new(NSPoint::new(100.0, 80.0), NSSize::new(100.0, 30.0));
