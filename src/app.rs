@@ -49,15 +49,6 @@ fn objective_c_methods(decl: &mut ClassDecl) {
   }
 }
 
-fn sbi_set_app_icon() {
-  unsafe {
-    let icon_path = NSString::alloc(nil).init_str("assets/favicon-light.png");
-    let icon_image: id = msg_send![class!(NSImage), alloc]; /* just an allocated object */
-    let icon_image: id = msg_send![icon_image, initWithContentsOfFile: icon_path];
-    let _: () = msg_send![STATUS_ITEM.button(), setImage: icon_image];
-  }
-}
-
 fn sbi_handle_click(delegate: *mut Object) {
   unsafe {
     // click handler
@@ -68,6 +59,72 @@ fn sbi_handle_click(delegate: *mut Object) {
     POPOVER = msg_send![class!(NSPopover), new];
     let _: () = msg_send![POPOVER, setBehavior: 1i64];
   }
+}
+
+
+/* COMPONENTS */
+fn sbi_set_app_icon() {
+  unsafe {
+    let icon_path = NSString::alloc(nil).init_str("assets/favicon-light.png");
+    let icon_image: id = msg_send![class!(NSImage), alloc]; /* just an allocated object */
+    let icon_image: id = msg_send![icon_image, initWithContentsOfFile: icon_path];
+    let _: () = msg_send![STATUS_ITEM.button(), setImage: icon_image];
+  }
+}
+fn sbi_quit_btn(delegate: *mut Object, view: *mut Object) {
+	unsafe {
+		let btn_frame = NSRect::new(
+			NSPoint::new(EDGE, SHIFT),
+			NSSize::new(WIDTH - SHIFT, EDGE)
+		);
+		let quit_btn: id = msg_send![class!(NSButton), alloc];
+		let quit_btn: id = msg_send![quit_btn, initWithFrame: btn_frame];
+		let _: () = msg_send![quit_btn, setTitle: NSString::alloc(nil).init_str(t("quit"))];
+		let _: () = msg_send![quit_btn, setTarget: delegate];
+		let _: () = msg_send![quit_btn, setAction: selector("quit:")];
+		let _: () = msg_send![view, addSubview: quit_btn];
+	}
+}
+fn sbi_separator(view: *mut Object, multiplier: f64) {
+	unsafe {
+		let separator_frame = NSRect::new(
+			NSPoint::new(SHIFT, inverted_y(multiplier)),
+			NSSize::new(FULL, SHIFT),
+		);
+		let separator: id = msg_send![class!(NSBox), alloc];
+		let separator: id = msg_send![separator, initWithFrame: separator_frame];
+		let _: () = msg_send![separator, setBoxType: 2i64];
+		let _: () = msg_send![view, addSubview: separator];
+	}
+}
+fn sbi_popover_item(view: *mut Object) {
+	unsafe {
+		let input_frame = NSRect::new(
+			NSPoint::new(SHIFT, inverted_y(5.0) - SHIFT),
+			NSSize::new(FULL, 25.0),
+		);
+		let input: id = msg_send![class!(NSTextField), alloc];
+		let input: id = msg_send![input, initWithFrame: input_frame];
+		let _: () = msg_send![input, setPlaceholderString: NSString::alloc(nil).init_str(t("ask_sysenix"))];
+		let _: () = msg_send![view, addSubview: input];
+	}
+}
+
+fn sbi_popover_header(view: *mut Object) {
+	unsafe {
+		let header_frame = NSRect::new(
+			NSPoint::new(SHIFT, inverted_y(1.0) - EDGE),
+			NSSize::new(WIDTH, SHIFT),
+		);
+		let header: id = msg_send![class!(NSTextField), alloc];
+		let header: id = msg_send![header, initWithFrame: header_frame];
+		let _: () = msg_send![header, setStringValue: NSString::alloc(nil).init_str(t("sysenix"))];
+		let _: () = msg_send![header, setBordered: cocoa::base::NO];
+		let _: () = msg_send![header, setEditable: cocoa::base::NO];
+		let clear: id = msg_send![class!(NSColor), clearColor];
+		let _: () = msg_send![header, setBackgroundColor: clear];
+		let _: () = msg_send![view, addSubview: header];
+	}
 }
 
 pub fn main() {
@@ -82,13 +139,9 @@ pub fn main() {
     let bar = NSStatusBar::systemStatusBar(nil);
     STATUS_ITEM = bar.statusItemWithLength_(-1.0);
 
-    sbi_set_app_icon();
-
     let superclass = Class::get("NSObject").unwrap();
     let mut decl = ClassDecl::new("Delegate", superclass).unwrap();
-
     objective_c_methods(&mut decl);
-
     let delegate_class = decl.register();
     let delegate: id = msg_send![delegate_class, new];
 
@@ -98,67 +151,18 @@ pub fn main() {
     let frame = NSRect::new(NSPoint::new(0.0, 0.0), NSSize::new(WIDTH, HEIGHT));
     let view: id = msg_send![class!(NSView), alloc];
     let view: id = msg_send![view, initWithFrame: frame];
+
     let vc: id = msg_send![class!(NSViewController), new];
     let _: () = msg_send![vc, setView: view];
     let _: () = msg_send![POPOVER, setContentViewController: vc];
     let _: () = msg_send![POPOVER, setContentSize: NSSize::new(WIDTH, HEIGHT)];
 
-    // popover header
-    let header_frame = NSRect::new(
-      NSPoint::new(SHIFT, inverted_y(1.0) - EDGE),
-      NSSize::new(WIDTH, SHIFT),
-    );
-    let header: id = msg_send![class!(NSTextField), alloc];
-    let header: id = msg_send![header, initWithFrame: header_frame];
-    let _: () = msg_send![header, setStringValue: NSString::alloc(nil).init_str(t("sysenix"))];
-    let _: () = msg_send![header, setBordered: cocoa::base::NO];
-    let _: () = msg_send![header, setEditable: cocoa::base::NO];
-    let clear: id = msg_send![class!(NSColor), clearColor];
-    let _: () = msg_send![header, setBackgroundColor: clear];
-    let _: () = msg_send![view, addSubview: header];
-
-    // separator
-    let separator_frame = NSRect::new(
-      NSPoint::new(SHIFT, inverted_y(2.0) - SHIFT),
-      NSSize::new(FULL, SHIFT),
-    );
-    let separator: id = msg_send![class!(NSBox), alloc];
-    let separator: id = msg_send![separator, initWithFrame: separator_frame];
-    let _: () = msg_send![separator, setBoxType: 2i64];
-    let _: () = msg_send![view, addSubview: separator];
-
-    // popover input item
-    let input_frame = NSRect::new(
-      NSPoint::new(SHIFT, inverted_y(5.0) - SHIFT),
-      NSSize::new(FULL, 25.0),
-    );
-    let input: id = msg_send![class!(NSTextField), alloc];
-    let input: id = msg_send![input, initWithFrame: input_frame];
-    let _: () =
-      msg_send![input, setPlaceholderString: NSString::alloc(nil).init_str(t("ask_sysenix"))];
-    let _: () = msg_send![view, addSubview: input];
-
-    // separator
-    let separator_frame = NSRect::new(
-      NSPoint::new(SHIFT, inverted_y(8.0)),
-      NSSize::new(FULL, SHIFT),
-    );
-    let separator: id = msg_send![class!(NSBox), alloc];
-    let separator: id = msg_send![separator, initWithFrame: separator_frame];
-    let _: () = msg_send![separator, setBoxType: 2i64];
-    let _: () = msg_send![view, addSubview: separator];
-
-    // sbi_quit_btn
-    let btn_frame = NSRect::new(
-			NSPoint::new(EDGE, SHIFT),
-			NSSize::new(WIDTH - SHIFT, EDGE)
-		);
-    let quit_btn: id = msg_send![class!(NSButton), alloc];
-    let quit_btn: id = msg_send![quit_btn, initWithFrame: btn_frame];
-    let _: () = msg_send![quit_btn, setTitle: NSString::alloc(nil).init_str(t("quit"))];
-    let _: () = msg_send![quit_btn, setTarget: delegate];
-    let _: () = msg_send![quit_btn, setAction: selector("quit:")];
-    let _: () = msg_send![view, addSubview: quit_btn];
+    sbi_set_app_icon();
+   	sbi_popover_header(view);
+		sbi_separator(view, 3.0);
+		sbi_popover_item(view);
+		sbi_separator(view, 8.0);
+		sbi_quit_btn(delegate, view);
 
     app.run();
   }
