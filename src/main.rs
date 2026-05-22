@@ -9,7 +9,7 @@ use objc::runtime::{Class, Object, Sel};
 use objc::*;
 
 mod constants;
-use constants::{PADDING, WIDTH, HEIGHT};
+use constants::{WIDTH, HEIGHT};
 
 static mut POPOVER: id = nil;
 static mut STATUS_ITEM: id = nil;
@@ -104,7 +104,7 @@ fn main() {
     let _: () = msg_send![POPOVER, setContentSize: NSSize::new(WIDTH, HEIGHT)];
 
 		// popover header
-		let header_frame = NSRect::new(NSPoint::new(PADDING, PADDING * 1.5), NSSize::new(WIDTH, HEIGHT - PADDING * 2.0));
+		let header_frame = NSRect::new(NSPoint::new(15.0, 15.0 * 1.5), NSSize::new(WIDTH, 80.0));
 		let header: id = msg_send![class!(NSTextField), alloc];
 		let header: id = msg_send![header, initWithFrame: header_frame];
 		let _: () = msg_send![header, setStringValue: NSString::alloc(nil).init_str("Sysenix")];
@@ -115,28 +115,46 @@ fn main() {
 		let _: () = msg_send![view, addSubview: header];
 		
 		// separator
-		let separator_frame = NSRect::new(NSPoint::new(PADDING, PADDING * 1.5), NSSize::new(WIDTH - (PADDING * 2.0), HEIGHT - PADDING));
+		let separator_frame = NSRect::new(
+			NSPoint::new(15.0, 70.0),
+			NSSize::new(WIDTH - (15.0 * 2.0), 15.0)
+		);
 		let separator: id = msg_send![class!(NSBox), alloc];
 		let separator: id = msg_send![separator, initWithFrame: separator_frame];
-		let _: () = msg_send![separator, setBoxType: 2i64]; // NSBoxSeparator
+		let _: () = msg_send![separator, setBoxType: 2i64];
 		let _: () = msg_send![view, addSubview: separator];
 
 		// popover input item
-		let input_frame = NSRect::new(NSPoint::new(PADDING, PADDING), NSSize::new(WIDTH - (PADDING * 2.0), 25.0));
+		let input_frame = NSRect::new(
+			NSPoint::new(15.0, 45.0),
+			NSSize::new(WIDTH - (15.0 * 2.0), 25.0)
+		);
 		let input: id = msg_send![class!(NSTextField), alloc];
 		let input: id = msg_send![input, initWithFrame: input_frame];
 		let _: () = msg_send![input, setPlaceholderString: NSString::alloc(nil).init_str("Ask Sysenix...")];
 		let _: () = msg_send![view, addSubview: input];
 
-		
-		// // sbi_quit_btn
-		// let btn_frame = NSRect::new(NSPoint::new(100.0, 80.0), NSSize::new(100.0, 30.0));
-		// let quit_btn: id = msg_send![class!(NSButton), alloc];
-		// let quit_btn: id = msg_send![quit_btn, initWithFrame: btn_frame];
-		// let _: () = msg_send![quit_btn, setTitle: NSString::alloc(nil).init_str("Quit")];
-		// let _: () = msg_send![quit_btn, setTarget: delegate];
-		// let _: () = msg_send![quit_btn, setAction: selector("quit:")];
-		// let _: () = msg_send![view, addSubview: quit_btn];
+		// separator
+		let separator_frame = NSRect::new(
+			NSPoint::new(15.0, 30.0),
+			NSSize::new(WIDTH - (15.0 * 2.0), 15.0)
+		);
+		let separator: id = msg_send![class!(NSBox), alloc];
+		let separator: id = msg_send![separator, initWithFrame: separator_frame];
+		let _: () = msg_send![separator, setBoxType: 2i64];
+		let _: () = msg_send![view, addSubview: separator];
+
+		// sbi_quit_btn
+		let btn_frame = NSRect::new(
+			NSPoint::new(5.0, 10.0),
+			NSSize::new(WIDTH - 10.0, 15.0)
+		);
+		let quit_btn: id = msg_send![class!(NSButton), alloc];
+		let quit_btn: id = msg_send![quit_btn, initWithFrame: btn_frame];
+		let _: () = msg_send![quit_btn, setTitle: NSString::alloc(nil).init_str("Quit")];
+		let _: () = msg_send![quit_btn, setTarget: delegate];
+		let _: () = msg_send![quit_btn, setAction: selector("quit:")];
+		let _: () = msg_send![view, addSubview: quit_btn];
 
     app.run();
   }
