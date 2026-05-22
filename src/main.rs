@@ -85,15 +85,32 @@ fn main() {
     let delegate: id = msg_send![delegate_class, new];
 
     sbi_handle_click(delegate);
-    
+
 		// sbi_popover
-    let frame = NSRect::new(NSPoint::new(0.0, 0.0), NSSize::new(WIDTH, HEIGHT));
-    let view: id = msg_send![class!(NSView), alloc];
-    let view: id = msg_send![view, initWithFrame: frame];
+		let frame = NSRect::new(NSPoint::new(0.0, 0.0), NSSize::new(WIDTH, HEIGHT));
+		let view: id = msg_send![class!(NSView), alloc];
+		let view: id = msg_send![view, initWithFrame: frame];
     let vc: id = msg_send![class!(NSViewController), new];
     let _: () = msg_send![vc, setView: view];
     let _: () = msg_send![POPOVER, setContentViewController: vc];
     let _: () = msg_send![POPOVER, setContentSize: NSSize::new(WIDTH, HEIGHT)];
+
+		let input_frame = NSRect::new(NSPoint::new(WIDTH * 0.02, HEIGHT * 0.04), NSSize::new(WIDTH * 0.96, HEIGHT *  0.12));
+		let input: id = msg_send![class!(NSTextField), alloc];
+		let input: id = msg_send![input, initWithFrame: input_frame];
+		let _: () = msg_send![input, setPlaceholderString: NSString::alloc(nil).init_str("Ask Sysenix...")];
+		let _: () = msg_send![view, addSubview: input];
+
+
+		
+		// // sbi_quit_btn
+		// let btn_frame = NSRect::new(NSPoint::new(100.0, 80.0), NSSize::new(100.0, 30.0));
+		// let quit_btn: id = msg_send![class!(NSButton), alloc];
+		// let quit_btn: id = msg_send![quit_btn, initWithFrame: btn_frame];
+		// let _: () = msg_send![quit_btn, setTitle: NSString::alloc(nil).init_str("Quit")];
+		// let _: () = msg_send![quit_btn, setTarget: delegate];
+		// let _: () = msg_send![quit_btn, setAction: selector("quit:")];
+		// let _: () = msg_send![view, addSubview: quit_btn];
 
     app.run();
   }
