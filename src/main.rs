@@ -9,7 +9,10 @@ use objc::runtime::{Class, Object, Sel};
 use objc::*;
 
 mod constants;
-use constants::{EDGE, FULL, HEIGHT, SHIFT, WIDTH, inverted_y};
+use constants::{HEIGHT, inverted_y, SHIFT, WIDTH, EDGE, FULL};
+
+mod locales;
+use locales::t;
 
 static mut POPOVER: id = nil;
 static mut STATUS_ITEM: id = nil;
@@ -106,7 +109,7 @@ fn main() {
     );
     let header: id = msg_send![class!(NSTextField), alloc];
     let header: id = msg_send![header, initWithFrame: header_frame];
-    let _: () = msg_send![header, setStringValue: NSString::alloc(nil).init_str("Sysenix")];
+    let _: () = msg_send![header, setStringValue: NSString::alloc(nil).init_str(t("sysenix"))];
     let _: () = msg_send![header, setBordered: cocoa::base::NO];
     let _: () = msg_send![header, setEditable: cocoa::base::NO];
     let clear: id = msg_send![class!(NSColor), clearColor];
@@ -131,7 +134,7 @@ fn main() {
     let input: id = msg_send![class!(NSTextField), alloc];
     let input: id = msg_send![input, initWithFrame: input_frame];
     let _: () =
-      msg_send![input, setPlaceholderString: NSString::alloc(nil).init_str("Ask Sysenix...")];
+      msg_send![input, setPlaceholderString: NSString::alloc(nil).init_str(t("ask_sysenix"))];
     let _: () = msg_send![view, addSubview: input];
 
     // separator
@@ -145,10 +148,13 @@ fn main() {
     let _: () = msg_send![view, addSubview: separator];
 
     // sbi_quit_btn
-    let btn_frame = NSRect::new(NSPoint::new(EDGE, SHIFT), NSSize::new(WIDTH - SHIFT, EDGE));
+    let btn_frame = NSRect::new(
+			NSPoint::new(EDGE, SHIFT),
+			NSSize::new(WIDTH - SHIFT, EDGE)
+		);
     let quit_btn: id = msg_send![class!(NSButton), alloc];
     let quit_btn: id = msg_send![quit_btn, initWithFrame: btn_frame];
-    let _: () = msg_send![quit_btn, setTitle: NSString::alloc(nil).init_str("Quit")];
+    let _: () = msg_send![quit_btn, setTitle: NSString::alloc(nil).init_str(t("quit"))];
     let _: () = msg_send![quit_btn, setTarget: delegate];
     let _: () = msg_send![quit_btn, setAction: selector("quit:")];
     let _: () = msg_send![view, addSubview: quit_btn];
