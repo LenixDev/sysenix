@@ -3,7 +3,5 @@ name = "sysenix"
 edition = "2024"
 
 [dependencies]
-lenix = "0.1.3"
-tray-icon = "0.19"
-winit = "0.30"
-png = "0.17"
+cocoa = "0.25"
+objc = "0.2"
