@@ -8,11 +8,10 @@ use objc::declare::ClassDecl;
 use objc::runtime::{Class, Object, Sel};
 use objc::*;
 
+mod contstants;
+
 static mut POPOVER: id = nil;
 static mut STATUS_ITEM: id = nil;
-static WIDTH: f64 = 300.0;
-static HEIGHT: f64 = 75.0;
-static PADDING: f64 = 10.0;
 
 extern "C" fn toggle_popover(_this: &Object, _cmd: Sel, _sender: id) {
   unsafe {
@@ -88,22 +87,22 @@ fn main() {
     sbi_handle_click(delegate);
 
 		// sbi_popover
-		let frame = NSRect::new(NSPoint::new(0.0, 0.0), NSSize::new(WIDTH, HEIGHT));
+		let frame = NSRect::new(NSPoint::new(0.0, 0.0), NSSize::new(contstants::WIDTH, contstants::HEIGHT));
 		let view: id = msg_send![class!(NSView), alloc];
 		let view: id = msg_send![view, initWithFrame: frame];
     let vc: id = msg_send![class!(NSViewController), new];
     let _: () = msg_send![vc, setView: view];
     let _: () = msg_send![POPOVER, setContentViewController: vc];
-    let _: () = msg_send![POPOVER, setContentSize: NSSize::new(WIDTH, HEIGHT)];
+    let _: () = msg_send![POPOVER, setContentSize: NSSize::new(contstants::WIDTH, contstants::HEIGHT)];
 
 		// popover input item
-		let input_frame = NSRect::new(NSPoint::new(PADDING, PADDING), NSSize::new(WIDTH - (PADDING * 2.0), 25.0));
+		let input_frame = NSRect::new(NSPoint::new(contstants::PADDING, contstants::PADDING), NSSize::new(contstants::WIDTH - (contstants::PADDING * 2.0), 25.0));
 		let input: id = msg_send![class!(NSTextField), alloc];
 		let input: id = msg_send![input, initWithFrame: input_frame];
 		let _: () = msg_send![input, setPlaceholderString: NSString::alloc(nil).init_str("Ask Sysenix...")];
 		let _: () = msg_send![view, addSubview: input];
 
-		let header_frame = NSRect::new(NSPoint::new(PADDING, PADDING), NSSize::new(WIDTH * 0.8, HEIGHT - PADDING * 2.0));
+		let header_frame = NSRect::new(NSPoint::new(contstants::PADDING, contstants::PADDING), NSSize::new(contstants::WIDTH * 0.8, contstants::HEIGHT - contstants::PADDING * 2.0));
 		let header: id = msg_send![class!(NSTextField), alloc];
 		let header: id = msg_send![header, initWithFrame: header_frame];
 		let _: () = msg_send![header, setStringValue: NSString::alloc(nil).init_str("Sysenix")];
