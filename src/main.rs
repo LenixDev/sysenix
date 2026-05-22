@@ -9,7 +9,7 @@ use objc::runtime::{Class, Object, Sel};
 use objc::*;
 
 mod constants;
-use constants::{HEIGHT, length, SHIFT, WIDTH, EDGE, FULL};
+use constants::{EDGE, FULL, HEIGHT, SHIFT, WIDTH, inverted_y};
 
 static mut POPOVER: id = nil;
 static mut STATUS_ITEM: id = nil;
@@ -101,7 +101,7 @@ fn main() {
 
     // popover header
     let header_frame = NSRect::new(
-      NSPoint::new(SHIFT, length(1.0) - EDGE),
+      NSPoint::new(SHIFT, inverted_y(1.0) - EDGE),
       NSSize::new(WIDTH, SHIFT),
     );
     let header: id = msg_send![class!(NSTextField), alloc];
@@ -115,7 +115,7 @@ fn main() {
 
     // separator
     let separator_frame = NSRect::new(
-      NSPoint::new(SHIFT, length(2.0) - SHIFT),
+      NSPoint::new(SHIFT, inverted_y(2.0) - SHIFT),
       NSSize::new(FULL, SHIFT),
     );
     let separator: id = msg_send![class!(NSBox), alloc];
@@ -125,7 +125,7 @@ fn main() {
 
     // popover input item
     let input_frame = NSRect::new(
-      NSPoint::new(SHIFT, length(5.0) - SHIFT),
+      NSPoint::new(SHIFT, inverted_y(5.0) - SHIFT),
       NSSize::new(FULL, 25.0),
     );
     let input: id = msg_send![class!(NSTextField), alloc];
@@ -136,7 +136,7 @@ fn main() {
 
     // separator
     let separator_frame = NSRect::new(
-      NSPoint::new(SHIFT, length(8.0)),
+      NSPoint::new(SHIFT, inverted_y(8.0)),
       NSSize::new(FULL, SHIFT),
     );
     let separator: id = msg_send![class!(NSBox), alloc];
@@ -145,10 +145,7 @@ fn main() {
     let _: () = msg_send![view, addSubview: separator];
 
     // sbi_quit_btn
-    let btn_frame = NSRect::new(
-			NSPoint::new(EDGE, SHIFT),
-			NSSize::new(WIDTH - SHIFT, EDGE)
-		);
+    let btn_frame = NSRect::new(NSPoint::new(EDGE, SHIFT), NSSize::new(WIDTH - SHIFT, EDGE));
     let quit_btn: id = msg_send![class!(NSButton), alloc];
     let quit_btn: id = msg_send![quit_btn, initWithFrame: btn_frame];
     let _: () = msg_send![quit_btn, setTitle: NSString::alloc(nil).init_str("Quit")];
