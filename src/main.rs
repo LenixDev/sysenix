@@ -29,27 +29,7 @@ extern "C" fn toggle_popover(_this: &Object, _cmd: Sel, _sender: id) {
   }
 }
 
-fn handle_sbi_click() {
-  unsafe {
-    // click handler
-    let superclass = Class::get("NSObject").unwrap();
-    let mut decl = ClassDecl::new("Delegate", superclass).unwrap();
-    decl.add_method(
-      selector("toggle:"),
-      toggle_popover as extern "C" fn(&Object, Sel, id),
-    );
-    let delegate_class = decl.register();
-    let delegate: id = msg_send![delegate_class, new];
-    NSButton::setTarget_(STATUS_ITEM.button(), delegate);
-    STATUS_ITEM.button().setAction_(selector("toggle:"));
-
-    // popover
-    POPOVER = msg_send![class!(NSPopover), new];
-    let _: () = msg_send![POPOVER, setBehavior: 1i64];
-  }
-}
-
-fn set_sbi_app_icon() {
+fn sbi_set_app_icon() {
   unsafe {
     let icon_path = NSString::alloc(nil).init_str("assets/favicon-light.png");
     let icon_image: id = msg_send![class!(NSImage), alloc]; /* just an allocated object */
@@ -58,15 +38,19 @@ fn set_sbi_app_icon() {
   }
 }
 
-fn render_sbi_popover() {
+extern "C" fn quit(_this: &Object, _cmd: Sel, _sender: id) {
+  std::process::exit(0);
+}
+
+fn sbi_handle_click(delegate: *mut Object) {
   unsafe {
-    let frame = NSRect::new(NSPoint::new(0.0, 0.0), NSSize::new(WIDTH, HEIGHT));
-    let view: id = msg_send![class!(NSView), alloc];
-    let view: id = msg_send![view, initWithFrame: frame];
-    let vc: id = msg_send![class!(NSViewController), new];
-    let _: () = msg_send![vc, setView: view];
-    let _: () = msg_send![POPOVER, setContentViewController: vc];
-    let _: () = msg_send![POPOVER, setContentSize: NSSize::new(WIDTH, HEIGHT)];
+    // click handler
+    NSButton::setTarget_(STATUS_ITEM.button(), delegate);
+    STATUS_ITEM.button().setAction_(selector("toggle:"));
+
+    // popover
+    POPOVER = msg_send![class!(NSPopover), new];
+    let _: () = msg_send![POPOVER, setBehavior: 1i64];
   }
 }
 
@@ -82,9 +66,34 @@ fn main() {
     let bar = NSStatusBar::systemStatusBar(nil);
     STATUS_ITEM = bar.statusItemWithLength_(-1.0);
 
-    set_sbi_app_icon();
-    handle_sbi_click();
-    render_sbi_popover();
+    sbi_set_app_icon();
+
+    let superclass = Class::get("NSObject").unwrap();
+    let mut decl = ClassDecl::new("Delegate", superclass).unwrap();
+
+		// Object-C methods
+    decl.add_method(
+      selector("toggle:"),
+      toggle_popover as extern "C" fn(&Object, Sel, id),
+    );
+		decl.add_method(
+			selector("quit:"),
+			quit as extern "C" fn(&Object, Sel, id)
+		);
+
+    let delegate_class = decl.register();
+    let delegate: id = msg_send![delegate_class, new];
+
+    sbi_handle_click(delegate);
+    
+		// sbi_popover
+    let frame = NSRect::new(NSPoint::new(0.0, 0.0), NSSize::new(WIDTH, HEIGHT));
+    let view: id = msg_send![class!(NSView), alloc];
+    let view: id = msg_send![view, initWithFrame: frame];
+    let vc: id = msg_send![class!(NSViewController), new];
+    let _: () = msg_send![vc, setView: view];
+    let _: () = msg_send![POPOVER, setContentViewController: vc];
+    let _: () = msg_send![POPOVER, setContentSize: NSSize::new(WIDTH, HEIGHT)];
 
     app.run();
   }
