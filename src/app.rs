@@ -47,6 +47,18 @@ fn objective_c_methods(decl: &mut ClassDecl) {
   unsafe {
     decl.add_method(selector("quit:"), quit as extern "C" fn(&Object, Sel, id));
   }
+
+	extern "C" fn on_input(_this: &Object, _cmd: Sel, sender: id) {
+		unsafe {
+			let text: id = msg_send![sender, stringValue];
+			let cstr: *const i8 = msg_send![text, UTF8String];
+			let s = std::ffi::CStr::from_ptr(cstr).to_str().unwrap();
+			println!("input: {}", s);
+		}
+	}
+	unsafe {
+		decl.add_method(selector("on_input:"), on_input as extern "C" fn(&Object, Sel, id));
+	}
 }
 
 fn sbi_handle_click(delegate: *mut Object) {
@@ -70,7 +82,7 @@ fn sbi_set_app_icon() {
     let _: () = msg_send![STATUS_ITEM.button(), setImage: icon_image];
   }
 }
-fn sbi_popover_input(view: *mut Object) {
+fn sbi_popover_input(delegate: *mut Object, view: *mut Object) {
   unsafe {
     let input_frame = NSRect::new(
       NSPoint::new(SHIFT, inverted_y(5.0) - SHIFT),
@@ -81,6 +93,8 @@ fn sbi_popover_input(view: *mut Object) {
     let _: () =
       msg_send![input, setPlaceholderString: NSString::alloc(nil).init_str(t("ask_sysenix"))];
     let _: () = msg_send![view, addSubview: input];
+		let _: () = msg_send![input, setTarget: delegate];
+		let _: () = msg_send![input, setAction: selector("on_input:")];
   }
 }
 fn sbi_popover_header(view: *mut Object) {
@@ -157,7 +171,7 @@ pub fn start() {
     sbi_set_app_icon();
     sbi_popover_header(view);
     sbi_separator(view, 3.0);
-    sbi_popover_input(view);
+		sbi_popover_input(delegate, view);
     sbi_separator(view, 8.0);
     sbi_quit_btn(delegate, view);
 
