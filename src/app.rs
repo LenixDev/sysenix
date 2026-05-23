@@ -70,7 +70,7 @@ fn sbi_set_app_icon() {
     let _: () = msg_send![STATUS_ITEM.button(), setImage: icon_image];
   }
 }
-fn sbi_popover_item(view: *mut Object) {
+fn sbi_popover_input(view: *mut Object) {
   unsafe {
     let input_frame = NSRect::new(
       NSPoint::new(SHIFT, inverted_y(5.0) - SHIFT),
@@ -102,8 +102,8 @@ fn sbi_popover_header(view: *mut Object) {
 fn sbi_separator(view: *mut Object, multiplier: f64) {
   unsafe {
     let separator_frame = NSRect::new(
-      NSPoint::new(SHIFT, inverted_y(multiplier) + SHIFT),
-      NSSize::new(FULL, 0.0),
+      NSPoint::new(SHIFT, inverted_y(multiplier)),
+      NSSize::new(FULL, SHIFT),
     );
     let separator: id = msg_send![class!(NSBox), alloc];
     let separator: id = msg_send![separator, initWithFrame: separator_frame];
@@ -113,7 +113,7 @@ fn sbi_separator(view: *mut Object, multiplier: f64) {
 }
 fn sbi_quit_btn(delegate: *mut Object, view: *mut Object) {
   unsafe {
-    let btn_frame = NSRect::new(NSPoint::new(EDGE, SHIFT), NSSize::new(WIDTH - SHIFT, EDGE));
+    let btn_frame = NSRect::new(NSPoint::new(EDGE, SHIFT), NSSize::new(WIDTH - SHIFT, 20.0));
     let quit_btn: id = msg_send![class!(NSButton), alloc];
     let quit_btn: id = msg_send![quit_btn, initWithFrame: btn_frame];
     let _: () = msg_send![quit_btn, setTitle: NSString::alloc(nil).init_str(t("quit"))];
@@ -157,7 +157,7 @@ pub fn start() {
     sbi_set_app_icon();
     sbi_popover_header(view);
     sbi_separator(view, 3.0);
-    sbi_popover_item(view);
+    sbi_popover_input(view);
     sbi_separator(view, 8.0);
     sbi_quit_btn(delegate, view);
 
