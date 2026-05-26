@@ -6,6 +6,7 @@ mod screenshot;
 mod to_base64;
 mod parser;
 mod prompt;
+mod click;
 
 fn main() {
   app::start();
