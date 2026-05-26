@@ -1,18 +1,24 @@
-pub fn parse_response(raw: &str) -> String {
-  // find the HTTP body — skip headers
-  let body = if let Some(i) = raw.find("\r\n\r\n") {
-    &raw[i + 4..]
-  } else {
-    raw
-  };
+pub struct Action {
+  pub x: i32,
+  pub y: i32,
+  pub is_last_step: bool,
+}
 
-  // extract "response":"..." value
-  if let Some(start) = body.find("\"response\":\"") {
-    let rest = &body[start + 12..];
-    if let Some(end) = rest.find("\"") {
-      return rest[..end].to_string();
-    }
-  }
+pub fn parse(response: &str) -> Option<Action> {
+  let x = extract(response, "\"x\":")?;
+  let y = extract(response, "\"y\":")?;
+  let is_last_step = response.contains("\"isLastStep\":true");
 
-  body.to_string()
+  Some(Action {
+    x: x as i32,
+    y: y as i32,
+    is_last_step,
+  })
+}
+
+fn extract(s: &str, key: &str) -> Option<f64> {
+  let start = s.find(key)? + key.len();
+  let rest = s[start..].trim_start();
+  let end = rest.find(|c: char| !c.is_ascii_digit() && c != '.').unwrap_or(rest.len());
+  rest[..end].parse().ok()
 }
