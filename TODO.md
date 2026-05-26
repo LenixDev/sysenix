@@ -1,0 +1,1 @@
+- [ ] Synced SBI app icon with theme mode
