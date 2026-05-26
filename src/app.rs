@@ -11,6 +11,8 @@ use objc::*;
 use crate::constants::{EDGE, FULL, HEIGHT, SHIFT, WIDTH};
 use crate::locales::t;
 use crate::ai;
+use crate::screenshot;
+use crate::to_base64;
 
 static mut POPOVER: id = nil;
 static mut STATUS_ITEM: id = nil;
@@ -54,7 +56,10 @@ fn objective_c_methods(decl: &mut ClassDecl) {
 			let text: id = msg_send![sender, stringValue];
 			let cstr: *const i8 = msg_send![text, UTF8String];
 			let s = std::ffi::CStr::from_ptr(cstr).to_str().unwrap();
-			let response = ai::ask(s);
+			
+			let bytes = screenshot::shot();
+			let image = to_base64::to_base64(&bytes);
+			let response = ai::ask(s, &image);
 			println!("{}", response);
 		}
 	}

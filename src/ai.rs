@@ -1,10 +1,10 @@
 use std::io::{Read, Write};
 use std::net::TcpStream;
 
-pub fn ask(prompt: &str) -> String {
+pub fn ask(prompt: &str, image_base64: &str) -> String {
   let body = format!(
-    r#"{{"model":"llava","prompt":"{}","stream":false}}"#,
-    prompt
+    r#"{{"model":"llava","prompt":"{}","images":["{}"],"stream":false}}"#,
+    prompt, image_base64
   );
 
   let request = format!(
