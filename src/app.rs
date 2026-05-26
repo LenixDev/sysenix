@@ -10,10 +10,12 @@ use objc::*;
 
 use crate::constants::{EDGE, FULL, HEIGHT, SHIFT, WIDTH};
 use crate::locales::t;
-use crate::ai::ask;
+use crate::ai::{ask, parse_response};
 use crate::screenshot::shot;
 use crate::to_base64::to_base64;
 use crate::prompt::system;
+use crate::parser::parse;
+use crate::click::at;
 
 static mut POPOVER: id = nil;
 static mut STATUS_ITEM: id = nil;
@@ -56,13 +58,27 @@ fn objective_c_methods(decl: &mut ClassDecl) {
 		unsafe {
 			let text: id = msg_send![sender, stringValue];
 			let cstr: *const i8 = msg_send![text, UTF8String];
-			let s = std::ffi::CStr::from_ptr(cstr).to_str().unwrap();
-			
-			let bytes = shot();
-			let image = to_base64(&bytes);
-			let prompt = system(s);
-			let response = ask(&prompt, &image);
-			println!("{}", response);
+			let user_request = std::ffi::CStr::from_ptr(cstr).to_str().unwrap().to_string();
+	
+			std::thread::spawn(move || {
+				loop {
+					let bytes = shot();
+					let image = to_base64(&bytes);
+					let prompt = system(&user_request);
+					let raw = ask(&prompt, &image);
+					let response = parse_response(&raw);
+	
+					if let Some(action) = parse(&response) {
+						at(action.x as f64, action.y as f64);
+						if action.is_last_step {
+							break;
+						}
+						std::thread::sleep(std::time::Duration::from_millis(500));
+					} else {
+						break;
+					}
+				}
+			});
 		}
 	}
 	unsafe {

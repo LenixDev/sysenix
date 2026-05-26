@@ -1,7 +1,7 @@
 use std::io::{Read, Write};
 use std::net::TcpStream;
 
-fn parse_response(raw: &str) -> String {
+pub fn parse_response(raw: &str) -> String {
   // find the HTTP body — skip headers
   let body = if let Some(i) = raw.find("\r\n\r\n") {
     &raw[i + 4..]
