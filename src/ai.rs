@@ -3,18 +3,28 @@ use std::process::Command;
 pub fn ask(prompt: &str, image_base64: &str) -> String {
   let api_key = std::env::var("KEY").expect("KEY not set");
 
+	let safe_prompt = prompt
+  .replace('\\', "\\\\")
+  .replace('"', "\\\"")
+  .replace('\n', "\\n")
+  .replace('\r', "");
+
   let body = format!(
-    r#"{{"contents":[{{"parts":[{{"text":"{}"}},{{"inline_data":{{"mime_type":"image/png","data":"{}"}}}}]}}]}}"#,
-    prompt, image_base64
+    r#"{{"model":"meta-llama/llama-4-scout-17b-16e-instruct","messages":[{{"role":"user","content":[{{"type":"text","text":"{}"}},{{"type":"image_url","image_url":{{"url":"data:image/png;base64,{}"}}}}]}}],"max_tokens":1024}}"#,
+    safe_prompt, image_base64
   );
+
+  let tmp = "/tmp/sysenix_request.json";
+  std::fs::write(tmp, &body).unwrap();
 
   let output = Command::new("curl")
     .args([
       "-s",
       "-X", "POST",
-      &format!("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={}", api_key),
+      "https://api.groq.com/openai/v1/chat/completions",
       "-H", "Content-Type: application/json",
-      "-d", &body,
+      "-H", &format!("Authorization: Bearer {}", api_key),
+      "-d", &format!("@{}", tmp),
     ])
     .output()
     .unwrap();
@@ -23,13 +33,11 @@ pub fn ask(prompt: &str, image_base64: &str) -> String {
   parse_response(&raw)
 }
 
+
 pub fn parse_response(raw: &str) -> String {
-  // extract text from "parts":[{"text":"..."}]
-  if let Some(start) = raw.find("\"text\":\"") {
-    let rest = &raw[start + 8..];
-    if let Some(end) = rest.find("\"") {
-      return rest[..end].to_string();
-    }
-  }
-  raw.to_string()
+  let json: serde_json::Value = serde_json::from_str(raw).unwrap_or_default();
+  json["choices"][0]["message"]["content"]
+    .as_str()
+    .unwrap_or("")
+    .to_string()
 }

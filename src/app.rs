@@ -64,11 +64,12 @@ fn objective_c_methods(decl: &mut ClassDecl) {
 				loop {
 					let bytes = shot();
 					let image = to_base64(&bytes);
-					let prompt = system(&user_request);
-					let raw = ask(&prompt, &image);
-					let response = parse_response(&raw);
-	
+					let prompt: String = system(&user_request);
+					let response = ask(&prompt, &image);
+					println!("response: {}", response);
+					
 					if let Some(action) = parse(&response) {
+						println!("clicking: {} {}", action.x, action.y);
 						at(action.x as f64, action.y as f64);
 						if action.is_last_step {
 							break;
