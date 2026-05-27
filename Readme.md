@@ -25,3 +25,7 @@ And it figures out the right way **BASED ON your specific system**, does it, and
 You ask:
 > create an Intellenix account for me
 And it'll open app/browser and process the request by interacting from your device
+
+## Docs
+echo 'export KEY=your_key_here' >> ~/.zshrc
+source ~/.zshrc
