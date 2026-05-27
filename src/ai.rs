@@ -30,12 +30,7 @@ pub fn ask(prompt: &str, image_base64: &str) -> String {
     .unwrap();
 
   let raw = String::from_utf8(output.stdout).unwrap();
-  parse_response(&raw)
-}
-
-
-pub fn parse_response(raw: &str) -> String {
-  let json: serde_json::Value = serde_json::from_str(raw).unwrap_or_default();
+	let json: serde_json::Value = serde_json::from_str(&raw).unwrap_or_default();
   json["choices"][0]["message"]["content"]
     .as_str()
     .unwrap_or("")
