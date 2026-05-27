@@ -10,12 +10,12 @@ use objc::*;
 
 use crate::constants::{EDGE, FULL, HEIGHT, SHIFT, WIDTH};
 use crate::locales::t;
-use crate::ai::{ask, parse_response};
-use crate::screenshot::shot;
+use crate::ai::{ask};
+use crate::screenshot::{shot, dimensions};
 use crate::to_base64::to_base64;
 use crate::prompt::system;
 use crate::parser::parse;
-use crate::click::at;
+use crate::click::{at};
 
 static mut POPOVER: id = nil;
 static mut STATUS_ITEM: id = nil;
@@ -63,13 +63,16 @@ fn objective_c_methods(decl: &mut ClassDecl) {
 			std::thread::spawn(move || {
 				loop {
 					let bytes = shot();
+					let (img_w, img_h) = dimensions(&bytes);
+					println!("screenshot: {}x{}", img_w, img_h);
+
 					let image = to_base64(&bytes);
-					let prompt: String = system(&user_request);
+					let prompt: String = system(&user_request, img_w, img_h);
 					let response = ask(&prompt, &image);
 					println!("response: {}", response);
 					
 					if let Some(action) = parse(&response) {
-						println!("clicking: {} {}", action.x, action.y);
+						println!("clicking at: {} {} coords", action.x, action.y);
 						at(action.x as f64, action.y as f64);
 						if action.is_last_step {
 							break;

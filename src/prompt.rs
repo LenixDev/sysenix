@@ -1,4 +1,4 @@
-pub fn system(user_request: &str) -> String {
+pub fn system(user_request: &str, img_w: u32, img_h: u32) -> String {
   format!(r#"
 You are a macOS automation agent. The user wants to: {}
 
@@ -14,5 +14,8 @@ Rules:
 - x and y are the exact pixel coordinates to click
 - isLastStep is false if more steps are needed to complete the request
 - respond with JSON only, no explanation, no markdown
-"#, user_request)
+
+Informations:
+- screen dimensions are {}x{}
+"#, user_request, img_w, img_h)
 }

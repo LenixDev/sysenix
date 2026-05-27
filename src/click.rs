@@ -15,7 +15,7 @@ struct CGPoint {
 
 pub fn at(x: f64, y: f64) {
   unsafe {
-		let point = CGPoint { x, y };
+		let point = CGPoint { x: x / 2.0, y: y / 2.0 };
 		let event = CGEventCreateMouseEvent(std::ptr::null(), 1, point, 0); // 1 = left mouse down
     CGEventPost(0, event);
     let event = CGEventCreateMouseEvent(std::ptr::null(), 2, point, 0); // 2 = left mouse up
