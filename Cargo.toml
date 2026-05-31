@@ -4,5 +4,6 @@ edition = "2024"
 
 [dependencies]
 cocoa = "0.25"
+mutex = "1.0.2"
 objc = "0.2"
 serde_json = "1.0.150"

@@ -1,17 +1,27 @@
-use std::process::Command;
+use std::{process::Command, sync::Mutex};
 
-pub fn ask(prompt: &str, image_base64: &str) -> String {
-  let api_key = std::env::var("KEY").expect("KEY not set");
+pub fn ask(prompt: &str, conversation: &Mutex<Vec<(String, String)>>, image_base64: &str) -> String {
+	let api_key = std::env::var("KEY").expect("KEY not set");
 
-	let safe_prompt = prompt
-  .replace('\\', "\\\\")
-  .replace('"', "\\\"")
-  .replace('\n', "\\n")
-  .replace('\r', "");
+  let history = conversation.lock().unwrap();
+  let mut messages_json = String::new();
+  for (role, content) in history.iter() {
+    messages_json.push_str(&format!(
+      r#"{{"role":"{}","content":"{}"}}"#,
+      role, content.replace('"', "\\\"")
+    ));
+    messages_json.push(',');
+  }
+  messages_json.push_str(&format!(
+    r#"{{"role":"user","content":[{{"type":"text","text":"{}"}},{{"type":"image_url","image_url":{{"url":"data:image/png;base64,{}"}}}}]}}"#,
+    prompt.replace('"', "\\\"").replace('\n', "\\n"),
+    image_base64
+  ));
+  drop(history);
 
   let body = format!(
-    r#"{{"model":"meta-llama/llama-4-scout-17b-16e-instruct","messages":[{{"role":"user","content":[{{"type":"text","text":"{}"}},{{"type":"image_url","image_url":{{"url":"data:image/png;base64,{}"}}}}]}}],"max_tokens":1024}}"#,
-    safe_prompt, image_base64
+    r#"{{"model":"meta-llama/llama-4-scout-17b-16e-instruct","messages":[{}],"max_tokens":1024}}"#,
+    messages_json
   );
 
   let tmp = "/tmp/sysenix_request.json";

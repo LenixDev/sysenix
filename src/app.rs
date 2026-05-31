@@ -1,3 +1,5 @@
+use std::sync::Mutex;
+
 use cocoa::appkit::*;
 use cocoa::appkit::{
   NSApplicationActivationPolicy::NSApplicationActivationPolicyAccessory, NSButton, NSView,
@@ -19,6 +21,8 @@ use crate::click::{at};
 
 static mut POPOVER: id = nil;
 static mut STATUS_ITEM: id = nil;
+
+static CONVERSATIONS: Mutex<Vec<(String, String)>> = Mutex::new(Vec::new());
 
 fn inverted_y(multiplier: f64) -> f64 {
   HEIGHT - SHIFT * multiplier
@@ -59,7 +63,9 @@ fn objective_c_methods(decl: &mut ClassDecl) {
 			let text: id = msg_send![sender, stringValue];
 			let cstr: *const i8 = msg_send![text, UTF8String];
 			let user_request = std::ffi::CStr::from_ptr(cstr).to_str().unwrap().to_string();
-	
+			
+			CONVERSATIONS.lock().unwrap().push(("user".to_string(), user_request.clone()));
+
 			std::thread::spawn(move || {
 				loop {
 					let bytes = shot();
@@ -68,10 +74,14 @@ fn objective_c_methods(decl: &mut ClassDecl) {
 
 					let image = to_base64(&bytes);
 					let prompt: String = system(&user_request, img_w, img_h);
-					let response = ask(&prompt, &image);
-					
+					let response = ask(&prompt, &CONVERSATIONS, &image);
+
+					CONVERSATIONS.lock().unwrap().push(("sysenix".to_string(), response.clone()));
+
 					if let Some(action) = parse(&response) {
 						println!("clicking at: {} {} coords", action.x, action.y);
+						println!("conversation: {:?}", CONVERSATIONS.lock().unwrap());
+						println!("-------");
 						at(action.x as f64, action.y as f64);
 						if action.is_last_step {
 							break;
@@ -80,7 +90,6 @@ fn objective_c_methods(decl: &mut ClassDecl) {
 					} else {
 						break;
 					}
-					println!("-------");
 				}
 			});
 		}
