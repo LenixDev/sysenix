@@ -1,21 +1,20 @@
 pub fn system(user_request: &str, img_w: u32, img_h: u32) -> String {
-  format!(r#"
-You are a macOS automation agent. The user wants to: {}
+  format!(r#"You are a macOS automation agent. The user wants to: {}
 
-Look at the screenshot and respond ONLY with valid JSON in this exact format:
-{{
-  "action": "click",
-  "value": {{ "x": number, "y": number }},
-  "isLastStep": boolean
-}}
+The screenshot is {}x{} pixels. Coordinates (0,0) are at the TOP-LEFT corner.
+
+Your job:
+1. Look carefully at the screenshot
+2. Find the exact UI element to interact with
+3. Return the CENTER pixel coordinates of that element
+
+Respond ONLY with this exact JSON, nothing else, no markdown:
+{{"action":"click","value":{{"x":0,"y":0}},"isLastStep":true}}
 
 Rules:
-- action is always "click" for now
-- x and y are the exact pixel coordinates to click
-- isLastStep is false if more steps are needed to complete the request
-- respond with the given JSON format only, nothing else
-
-Informations:
-- screen dimensions are {}x{}
-"#, user_request, img_w, img_h)
+- x and y must be the CENTER of the target element in screenshot pixels
+- isLastStep is true if this click completes the task, false if more steps needed
+- if more steps needed, only return the NEXT step, not all steps
+- be precise — wrong coordinates mean the wrong element gets clicked"#, 
+  user_request, img_w, img_h)
 }
