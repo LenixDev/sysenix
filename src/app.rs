@@ -69,7 +69,6 @@ fn objective_c_methods(decl: &mut ClassDecl) {
 					let image = to_base64(&bytes);
 					let prompt: String = system(&user_request, img_w, img_h);
 					let response = ask(&prompt, &image);
-					println!("response: {}", response);
 					
 					if let Some(action) = parse(&response) {
 						println!("clicking at: {} {} coords", action.x, action.y);
@@ -81,6 +80,7 @@ fn objective_c_methods(decl: &mut ClassDecl) {
 					} else {
 						break;
 					}
+					println!("-------");
 				}
 			});
 		}
