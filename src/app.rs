@@ -104,16 +104,11 @@ fn sbi_handle_click(delegate: *mut Object) {
 
 /* COMPONENTS */
 fn sbi_set_app_icon() {
-	unsafe {
-		let appearance: id = msg_send![STATUS_ITEM.button(), effectiveAppearance];
-		let name: id = msg_send![appearance, name];
-		let cstr: *const i8 = msg_send![name, UTF8String];
-		let ns_mode = std::ffi::CStr::from_ptr(cstr).to_str().unwrap();
-		let theme = if ns_mode == "NSAppearanceNameVibrantDark" { "dark" } else { "light" };
-		let path = format!("assets/favicon-{}.png", theme);
-		let icon_path = NSString::alloc(nil).init_str(&path);
-    let icon_image: id = msg_send![class!(NSImage), alloc]; /* just an allocated object */
+  unsafe {
+    let icon_path = NSString::alloc(nil).init_str("assets/favicon-dark.png");
+    let icon_image: id = msg_send![class!(NSImage), alloc];
     let icon_image: id = msg_send![icon_image, initWithContentsOfFile: icon_path];
+    let _: () = msg_send![icon_image, setTemplate: cocoa::base::YES];
     let _: () = msg_send![STATUS_ITEM.button(), setImage: icon_image];
   }
 }
