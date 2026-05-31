@@ -76,7 +76,7 @@ fn objective_c_methods(decl: &mut ClassDecl) {
 					let prompt: String = system(&user_request, img_w, img_h);
 					let response = ask(&prompt, &CONVERSATIONS, &image);
 
-					CONVERSATIONS.lock().unwrap().push(("sysenix".to_string(), response.clone()));
+					CONVERSATIONS.lock().unwrap().push(("assistant".to_string(), response.clone()));
 
 					if let Some(action) = parse(&response) {
 						println!("clicking at: {} {} coords", action.x, action.y);
