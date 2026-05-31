@@ -1,2 +1,3 @@
 [alias]
-dev = "watch -x run"
+dev = "watch -x 'run --bin maain'"
+cli = "run --bin cli"
