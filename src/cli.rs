@@ -22,13 +22,15 @@ fn main() {
     let (w, h) = screenshot::dimensions(&bytes);
     let image = to_base64::to_base64(&bytes);
     let prompt = prompt::system(&user_request, w, h);
-		let conversations: Mutex<Vec<(String, String)>> = Mutex::new(Vec::new());
+    let conversations: Mutex<Vec<(String, String)>> = Mutex::new(Vec::new());
     let response = ai::ask(&prompt, &conversations, &image);
     println!("Sysenix: {}", response);
 
     if let Some(action) = parser::parse(&response) {
       click::at(action.x as f64, action.y as f64);
-      if action.is_last_step { break; }
+      if action.is_last_step {
+        break;
+      }
       std::thread::sleep(std::time::Duration::from_millis(500));
     } else {
       break;

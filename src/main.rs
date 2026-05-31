@@ -1,12 +1,12 @@
+mod ai;
 mod app;
+mod click;
 mod constants;
 mod locales;
-mod ai;
-mod screenshot;
-mod to_base64;
 mod parser;
 mod prompt;
-mod click;
+mod screenshot;
+mod to_base64;
 
 fn main() {
   app::start();

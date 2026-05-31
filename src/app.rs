@@ -10,14 +10,14 @@ use objc::declare::ClassDecl;
 use objc::runtime::{Class, Object, Sel};
 use objc::*;
 
+use crate::ai::ask;
+use crate::click::at;
 use crate::constants::{EDGE, FULL, HEIGHT, SHIFT, WIDTH};
 use crate::locales::t;
-use crate::ai::{ask};
-use crate::screenshot::{shot, dimensions};
-use crate::to_base64::to_base64;
-use crate::prompt::system;
 use crate::parser::parse;
-use crate::click::{at};
+use crate::prompt::system;
+use crate::screenshot::{dimensions, shot};
+use crate::to_base64::to_base64;
 
 static mut POPOVER: id = nil;
 static mut STATUS_ITEM: id = nil;
@@ -37,9 +37,9 @@ fn objective_c_methods(decl: &mut ClassDecl) {
       } else {
         let button = STATUS_ITEM.button();
         let _: () = msg_send![POPOVER,
-					showRelativeToRect: NSView::frame(button)
-					ofView: button
-					preferredEdge: 1u64
+          showRelativeToRect: NSView::frame(button)
+          ofView: button
+          preferredEdge: 1u64
         ];
       }
     }
@@ -58,45 +58,54 @@ fn objective_c_methods(decl: &mut ClassDecl) {
     decl.add_method(selector("quit:"), quit as extern "C" fn(&Object, Sel, id));
   }
 
-	extern "C" fn on_input(_this: &Object, _cmd: Sel, sender: id) {
-		unsafe {
-			let text: id = msg_send![sender, stringValue];
-			let cstr: *const i8 = msg_send![text, UTF8String];
-			let user_request = std::ffi::CStr::from_ptr(cstr).to_str().unwrap().to_string();
-			
-			CONVERSATIONS.lock().unwrap().push(("user".to_string(), user_request.clone()));
+  extern "C" fn on_input(_this: &Object, _cmd: Sel, sender: id) {
+    unsafe {
+      let text: id = msg_send![sender, stringValue];
+      let cstr: *const i8 = msg_send![text, UTF8String];
+      let user_request = std::ffi::CStr::from_ptr(cstr).to_str().unwrap().to_string();
 
-			std::thread::spawn(move || {
-				loop {
-					let bytes = shot();
-					let (img_w, img_h) = dimensions(&bytes);
-					println!("screenshot: {}x{}", img_w, img_h);
+      CONVERSATIONS
+        .lock()
+        .unwrap()
+        .push(("user".to_string(), user_request.clone()));
 
-					let image = to_base64(&bytes);
-					let prompt: String = system(&user_request, img_w, img_h);
-					let response = ask(&prompt, &CONVERSATIONS, &image);
+      std::thread::spawn(move || {
+        loop {
+          let bytes = shot();
+          let (img_w, img_h) = dimensions(&bytes);
+          println!("screenshot: {}x{}", img_w, img_h);
 
-					CONVERSATIONS.lock().unwrap().push(("assistant".to_string(), response.clone()));
+          let image = to_base64(&bytes);
+          let prompt: String = system(&user_request, img_w, img_h);
+          let response = ask(&prompt, &CONVERSATIONS, &image);
 
-					if let Some(action) = parse(&response) {
-						println!("clicking at: {} {} coords", action.x, action.y);
-						println!("conversation: {:?}", CONVERSATIONS.lock().unwrap());
-						println!("-------");
-						at(action.x as f64, action.y as f64);
-						if action.is_last_step {
-							break;
-						}
-						std::thread::sleep(std::time::Duration::from_millis(500));
-					} else {
-						break;
-					}
-				}
-			});
-		}
-	}
-	unsafe {
-		decl.add_method(selector("on_input:"), on_input as extern "C" fn(&Object, Sel, id));
-	}
+          CONVERSATIONS
+            .lock()
+            .unwrap()
+            .push(("assistant".to_string(), response.clone()));
+
+          if let Some(action) = parse(&response) {
+            println!("clicking at: {} {} coords", action.x, action.y);
+            println!("conversation: {:?}", CONVERSATIONS.lock().unwrap());
+            println!("-------");
+            at(action.x as f64, action.y as f64);
+            if action.is_last_step {
+              break;
+            }
+            std::thread::sleep(std::time::Duration::from_millis(500));
+          } else {
+            break;
+          }
+        }
+      });
+    }
+  }
+  unsafe {
+    decl.add_method(
+      selector("on_input:"),
+      on_input as extern "C" fn(&Object, Sel, id),
+    );
+  }
 }
 
 fn sbi_handle_click(delegate: *mut Object) {
@@ -107,7 +116,7 @@ fn sbi_handle_click(delegate: *mut Object) {
 
     // popover
     POPOVER = msg_send![class!(NSPopover), new];
-		let _: () = msg_send![POPOVER, setBehavior: 1i64];
+    let _: () = msg_send![POPOVER, setBehavior: 1i64];
   }
 }
 
@@ -132,8 +141,8 @@ fn sbi_popover_input(delegate: *mut Object, view: *mut Object) {
     let _: () =
       msg_send![input, setPlaceholderString: NSString::alloc(nil).init_str(t("ask_sysenix"))];
     let _: () = msg_send![view, addSubview: input];
-		let _: () = msg_send![input, setTarget: delegate];
-		let _: () = msg_send![input, setAction: selector("on_input:")];
+    let _: () = msg_send![input, setTarget: delegate];
+    let _: () = msg_send![input, setAction: selector("on_input:")];
   }
 }
 fn sbi_popover_header(view: *mut Object) {
@@ -172,7 +181,7 @@ fn sbi_quit_btn(delegate: *mut Object, view: *mut Object) {
     let _: () = msg_send![quit_btn, setTitle: NSString::alloc(nil).init_str(t("quit"))];
     let _: () = msg_send![quit_btn, setTarget: delegate];
     let _: () = msg_send![quit_btn, setAction: selector("quit:")];
-		let _: () = msg_send![quit_btn, setBezelStyle: 1i64];
+    let _: () = msg_send![quit_btn, setBezelStyle: 1i64];
     let _: () = msg_send![view, addSubview: quit_btn];
   }
 }
@@ -210,7 +219,7 @@ pub fn start() {
     sbi_set_app_icon();
     sbi_popover_header(view);
     sbi_separator(view, 3.0);
-		sbi_popover_input(delegate, view);
+    sbi_popover_input(delegate, view);
     sbi_separator(view, 8.0);
     sbi_quit_btn(delegate, view);
 

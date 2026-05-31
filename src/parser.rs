@@ -7,9 +7,9 @@ pub struct Action {
 pub fn parse(response: &str) -> Option<Action> {
   let x = extract(response, "\"x\":")?;
   let y = extract(response, "\"y\":")?;
-	let is_last_step = response.contains("\"isLastStep\":true") 
-		|| response.contains("\"isLastStep\": true");
-		
+  let is_last_step =
+    response.contains("\"isLastStep\":true") || response.contains("\"isLastStep\": true");
+
   Some(Action {
     x: x as i32,
     y: y as i32,
@@ -20,6 +20,8 @@ pub fn parse(response: &str) -> Option<Action> {
 fn extract(s: &str, key: &str) -> Option<f64> {
   let start = s.find(key)? + key.len();
   let rest = s[start..].trim_start();
-  let end = rest.find(|c: char| !c.is_ascii_digit() && c != '.').unwrap_or(rest.len());
+  let end = rest
+    .find(|c: char| !c.is_ascii_digit() && c != '.')
+    .unwrap_or(rest.len());
   rest[..end].parse().ok()
 }
