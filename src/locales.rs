@@ -3,6 +3,7 @@ pub fn t(key: &str) -> &str {
     "sysenix" => "Sysenix",
     "ask_sysenix" => "Ask Sysenix...",
     "quit" => "Quit",
+		"conversations_started" => "Sysenix — type your request, Enter to send, Ctrl+C to quit\n",
     _ => key,
   }
 }
