@@ -15,7 +15,7 @@ pub fn start() {
   let conversations: Mutex<Vec<(String, String)>> = Mutex::new(Vec::new());
 
   loop {
-    print!("You: ");
+	  println!("{}", t("you"));
     io::stdout().flush().unwrap();
 
     let mut input = String::new();
@@ -28,23 +28,30 @@ pub fn start() {
 
     conversations.lock().unwrap().push(("user".to_string(), user_request.clone()));
 
-    print!("Sysenix: thinking...");
+	  println!("{}", t("thinking"));
     io::stdout().flush().unwrap();
 
-    let bytes = screenshot::shot();
-    let (w, h) = screenshot::dimensions(&bytes);
-    let image = to_base64::to_base64(&bytes);
-    let prompt = prompt::system(&user_request, w, h);
-    let response = ai::ask(&prompt, &conversations, &image);
+    loop {
+      let bytes = screenshot::shot();
+      let (w, h) = screenshot::dimensions(&bytes);
+      let image = to_base64::to_base64(&bytes);
+      let prompt = prompt::system(&user_request, w, h);
+      let response = ai::ask(&prompt, &conversations, &image);
 
-    print!("\rSysenix: ");
-    if let Some(action) = parser::parse(&response) {
-      println!("clicking at ({}, {})", action.x, action.y);
-      click::at(action.x as f64, action.y as f64);
-      conversations.lock().unwrap().push(("assistant".to_string(), format!("Clicked at {},{}", action.x, action.y)));
-    } else {
-      println!("{}", response);
-      conversations.lock().unwrap().push(("assistant".to_string(), response));
+      print!("\r{}: ", t("sysenix"));
+      if let Some(action) = parser::parse(&response) {
+        println!("clicking at ({}, {})", action.x, action.y);
+        click::at(action.x as f64, action.y as f64);
+        conversations.lock().unwrap().push(("assistant".to_string(), format!("Clicked at {},{}", action.x, action.y)));
+        if action.is_last_step {
+          break;
+        }
+        std::thread::sleep(std::time::Duration::from_millis(500));
+      } else {
+        println!("{}", response);
+        conversations.lock().unwrap().push(("assistant".to_string(), response));
+        break;
+      }
     }
   }
 }
