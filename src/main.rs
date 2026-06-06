@@ -1,7 +1,5 @@
 mod ai;
-mod app;
 mod click;
-mod constants;
 mod locales;
 mod parser;
 mod prompt;

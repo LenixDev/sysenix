@@ -2,6 +2,12 @@ use std::io::{self, Write};
 use std::sync::Mutex;
 
 use crate::locales::t;
+use crate::parser;
+use crate::prompt;
+use crate::screenshot;
+use crate::to_base64;
+use crate::ai;
+use crate::click;
 
 pub fn start() {
   println!("{}", t("conversations_started"));
