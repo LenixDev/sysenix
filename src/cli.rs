@@ -15,7 +15,7 @@ pub fn start() {
   let conversations: Mutex<Vec<(String, String)>> = Mutex::new(Vec::new());
 
   loop {
-	  println!("{}", t("you"));
+	  print!("{}", t("you"));
     io::stdout().flush().unwrap();
 
     let mut input = String::new();
@@ -28,7 +28,7 @@ pub fn start() {
 
     conversations.lock().unwrap().push(("user".to_string(), user_request.clone()));
 
-	  println!("{}", t("thinking"));
+	  print!("{}", t("thinking"));
     io::stdout().flush().unwrap();
 
     loop {
