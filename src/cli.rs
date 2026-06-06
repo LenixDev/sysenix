@@ -3,15 +3,7 @@ use std::sync::Mutex;
 
 use crate::locales::t;
 
-mod ai;
-mod click;
-mod parser;
-mod prompt;
-mod screenshot;
-mod to_base64;
-mod locales;
-
-fn main() {
+pub fn start() {
   println!("{}", t("conversations_started"));
 
   let conversations: Mutex<Vec<(String, String)>> = Mutex::new(Vec::new());
