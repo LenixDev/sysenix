@@ -34,9 +34,8 @@ pub fn start() {
 		std::thread::sleep(std::time::Duration::from_millis(500));
     loop {
       let bytes = screenshot::shot();
-      let (w, h) = screenshot::dimensions(&bytes);
       let image = to_base64::to_base64(&bytes);
-      let prompt = prompt::system(&user_request, w, h);
+      let prompt = prompt::system(&user_request);
       let response = ai::ask(&prompt, &conversations, &image);
 
       print!("\r{}: ", t("sysenix"));

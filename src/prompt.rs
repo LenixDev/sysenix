@@ -1,8 +1,8 @@
-pub fn system(user_request: &str, img_w: u32, img_h: u32) -> String {
+pub fn system(user_request: &str) -> String {
   format!(
     r#"You are a macOS automation agent. The user wants to: {}
 
-The screenshot is {}x{} pixels. Coordinates (0,0) are at the TOP-LEFT corner.
+Coordinates (0,0) are at the TOP-LEFT corner.
 
 Your job:
 1. Look carefully at the screenshot
@@ -17,6 +17,6 @@ Rules:
 - isLastStep is true if this click completes the task, false if more steps needed
 - if more steps needed, only return the NEXT step, not all steps
 - be precise — wrong coordinates mean the wrong element gets clicked"#,
-    user_request, img_w, img_h
+    user_request
   )
 }
