@@ -28,9 +28,10 @@ pub fn start() {
 
     conversations.lock().unwrap().push(("user".to_string(), user_request.clone()));
 
-	  print!("{}", t("thinking"));
+	  println!("{}", t("thinking"));
     io::stdout().flush().unwrap();
 
+		std::thread::sleep(std::time::Duration::from_millis(500));
     loop {
       let bytes = screenshot::shot();
       let (w, h) = screenshot::dimensions(&bytes);
