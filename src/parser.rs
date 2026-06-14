@@ -11,8 +11,8 @@ pub fn parse(response: &str) -> Option<Action> {
     response.contains("\"isLastStep\":true") || response.contains("\"isLastStep\": true");
 
   Some(Action {
-    x: x as i32,
-    y: y as i32,
+    x: (x / 2.0) as i32,
+    y: (y / 2.0) as i32,
     is_last_step,
   })
 }
