@@ -28,3 +28,5 @@ And it'll open app/browser and process the request by interacting from your devi
 
 ## Docs
 cargo install cargo-watch
+curl -fsSL https://ollama.com/install.sh | sh
+ollama pull qwen2.5vl:7b
