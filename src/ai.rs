@@ -5,8 +5,6 @@ pub fn ask(
   conversation: &Mutex<Vec<(String, String)>>,
   image_base64: &str,
 ) -> String {
-  let api_key = std::env::var("KEY").expect("KEY not set");
-
   let history = conversation.lock().unwrap();
   let mut messages_json = String::new();
   for (role, content) in history.iter() {
@@ -24,29 +22,27 @@ pub fn ask(
   ));
   drop(history);
 
-  let body = format!(
-    r#"{{"model":"meta-llama/llama-4-scout-17b-16e-instruct","messages":[{}],"max_tokens":1024}}"#,
-    messages_json
-  );
+	let body = format!(
+		r#"{{"model":"qwen2.5vl:7b","messages":[{}],"max_tokens":1024}}"#,
+		messages_json
+	);
 
   let tmp = "/tmp/sysenix_request.json";
   std::fs::write(tmp, &body).unwrap();
 
-  let output = Command::new("curl")
-    .args([
-      "-s",
-      "-X",
-      "POST",
-      "https://api.groq.com/openai/v1/chat/completions",
-      "-H",
-      "Content-Type: application/json",
-      "-H",
-      &format!("Authorization: Bearer {}", api_key),
-      "-d",
-      &format!("@{}", tmp),
-    ])
-    .output()
-    .unwrap();
+	let output = Command::new("curl")
+		.args([
+			"-s",
+			"-X",
+			"POST",
+			"http://localhost:11434/v1/chat/completions",
+			"-H",
+			"Content-Type: application/json",
+			"-d",
+			&format!("@{}", tmp),
+		])
+		.output()
+		.unwrap();
 
   let raw = String::from_utf8(output.stdout).unwrap();
   let json: serde_json::Value = serde_json::from_str(&raw).unwrap_or_default();
