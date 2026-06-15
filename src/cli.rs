@@ -1,13 +1,13 @@
 use std::io::{self, Write};
 use std::sync::Mutex;
 
+use crate::ai;
+use crate::click;
 use crate::locales::t;
 use crate::parser;
 use crate::prompt;
 use crate::screenshot;
 use crate::to_base64;
-use crate::ai;
-use crate::click;
 
 pub fn start() {
   println!("{}", t("conversations_started"));
@@ -15,7 +15,7 @@ pub fn start() {
   let conversations: Mutex<Vec<(String, String)>> = Mutex::new(Vec::new());
 
   loop {
-	  print!("{}", t("you"));
+    print!("{}", t("you"));
     io::stdout().flush().unwrap();
 
     let mut input = String::new();
@@ -26,12 +26,15 @@ pub fn start() {
       continue;
     }
 
-    conversations.lock().unwrap().push(("user".to_string(), user_request.clone()));
+    conversations
+      .lock()
+      .unwrap()
+      .push(("user".to_string(), user_request.clone()));
 
-	  println!("{}", t("thinking"));
+    println!("{}", t("thinking"));
     io::stdout().flush().unwrap();
 
-		std::thread::sleep(std::time::Duration::from_millis(500));
+    std::thread::sleep(std::time::Duration::from_millis(500));
     loop {
       let bytes = screenshot::shot();
       let image = to_base64::to_base64(&bytes);
@@ -42,14 +45,20 @@ pub fn start() {
       if let Some(action) = parser::parse(&response) {
         println!("clicking at ({}, {})", action.x, action.y);
         click::at(action.x as f64, action.y as f64);
-        conversations.lock().unwrap().push(("assistant".to_string(), format!("Clicked at {},{}", action.x, action.y)));
+        conversations.lock().unwrap().push((
+          "assistant".to_string(),
+          format!("Clicked at {},{}", action.x, action.y),
+        ));
         if action.is_last_step {
           break;
         }
         std::thread::sleep(std::time::Duration::from_millis(500));
       } else {
         println!("{}", response);
-        conversations.lock().unwrap().push(("assistant".to_string(), response));
+        conversations
+          .lock()
+          .unwrap()
+          .push(("assistant".to_string(), response));
         break;
       }
     }
