@@ -1,19 +1,15 @@
 pub struct Action {
   pub x: i32,
   pub y: i32,
-  pub is_last_step: bool,
 }
 
 pub fn parse(response: &str) -> Option<Action> {
   let x = extract(response, "\"x\":")?;
   let y = extract(response, "\"y\":")?;
-  let is_last_step =
-    response.contains("\"isLastStep\":true") || response.contains("\"isLastStep\": true");
 
   Some(Action {
     x: (x / 2.0) as i32,
     y: (y / 2.0) as i32,
-    is_last_step,
   })
 }
 
