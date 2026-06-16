@@ -1,29 +1,18 @@
-use std::{process::Command, sync::Mutex};
+use std::{process::Command};
 
 pub fn ask(
   prompt: &str,
-  conversation: &Mutex<Vec<(String, String)>>,
   image_base64: &str,
 ) -> String {
-  let history = conversation.lock().unwrap();
   let mut messages_json = String::new();
-  for (role, content) in history.iter() {
-    messages_json.push_str(&format!(
-      r#"{{"role":"{}","content":"{}"}}"#,
-      role,
-      content.replace('"', "\\\"")
-    ));
-    messages_json.push(',');
-  }
   messages_json.push_str(&format!(
     r#"{{"role":"user","content":"{}","images":["{}"]}}"#,
     prompt.replace('"', "\\\"").replace('\n', "\\n"),
     image_base64
   ));
-  drop(history);
 
   let body = format!(
-    r#"{{"model":"minicpm-v:8b","options":{{"num_ctx":16384}},"messages":[{}],"stream":false}}"#,
+    r#"{{"model":"qwen2.5vl:32b","options":{{"num_ctx":16384}},"messages":[{}],"stream":false}}"#,
     messages_json
   );
 
